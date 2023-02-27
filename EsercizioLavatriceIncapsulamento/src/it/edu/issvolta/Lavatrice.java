@@ -2,6 +2,7 @@ package it.edu.issvolta;
 
 import java.time.LocalTime;
 import java.util.Scanner;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class Lavatrice {
 	
@@ -37,14 +38,18 @@ public class Lavatrice {
 	public Lavatrice (int capacità)
 	{
 		super();
-		if(capacità!=8 || capacità!=10 || capacità!=14)
+		if(capacità!=8 && capacità!=10 && capacità!=14)
 		{
 			System.out.println("Capacità non valida! Impostata capacità predefinita di 8 kg");
 			this.capacità=8;
 		}
 		else
 			this.capacità = capacità;
-		
+		inizializza();
+	}
+	
+	public void inizializza() //inizializza attributi
+	{
 		livelloAcqua = 0;
 		temperatura = 0;
 		velocitàRotazione = 0;
@@ -117,21 +122,28 @@ public class Lavatrice {
 	{
 		if(credito<getCosto())
 			System.out.println("Credito insufficiente!");
-		else if(livelloAcqua<4)
-			System.out.println("Livello acqua insufficiente!");
-		else if (temperatura==0)
-			System.out.println("Temperatura non impostata!");
-		else if(velocitàRotazione==0)
-			System.out.println("Velocità di rotazione non impostata!");
-		else if(!detersivo)
-			System.out.println("Detersivo non aggiunto!");
-		else if(stato!=0)
-			System.out.println("La lavatrice non è libera");
 		else 
 		{
-			stato=1;
-			dataOraAvvio=LocalTime.now();
-			System.out.println("La lavatrice è partita.");
+			if(livelloAcqua<4)
+				System.out.println("Livello acqua insufficiente!");
+			else 
+				if (temperatura==0)
+					System.out.println("Temperatura non impostata!");
+				else 
+					if(velocitàRotazione==0)
+						System.out.println("Velocità di rotazione non impostata!");
+					else 
+						if(!detersivo)
+							System.out.println("Detersivo non aggiunto!");
+						else 
+							if(stato!=0)
+								System.out.println("La lavatrice non è libera");
+							else
+							{
+								stato=1;
+								dataOraAvvio=LocalTime.now();
+								System.out.println("La lavatrice è partita.");
+							}
 		}
 	}
 	
@@ -148,12 +160,17 @@ public class Lavatrice {
 	
 	public String getStato()
 	{
+		LocalTime lt = LocalTime.now();
+		
+		if(stato==1 && SECONDS.between(dataOraAvvio, lt)>60)
+			stato=2;
+		
 		switch(stato)
 		{
 		case 0:
 			return "libera";
 		case 1:
-			return "lavaggio in corso";
+			return "lavaggio in corso. Tempo trascorso: "+SECONDS.between(dataOraAvvio, lt);
 		case 2:
 			return "lavaggio terminato";
 		default:
@@ -194,10 +211,14 @@ public class Lavatrice {
 	public void svuota() //riporta lo stato a 0 (se lo stato attuale è 2)
 	{
 		if(stato==2)
-			stato=0;
-		else if (stato==0)
-			System.out.println("Lavatrice già vuota");
+			inizializza();
 		else 
-			System.out.println("Lavaggio in corso");
+			{
+			if (stato==0)
+			
+				System.out.println("Lavatrice già vuota");
+			else 
+				System.out.println("Lavaggio in corso");
+			}
 	}
 }
